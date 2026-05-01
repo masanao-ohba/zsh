@@ -6,68 +6,111 @@ bindkey -r '^T'
 # auto pushd if cd.
 setopt auto_pushd
 
+# Platform helpers
+is_macos() {
+  [[ "$(uname -s 2>/dev/null)" == "Darwin" ]]
+}
+
+path_prepend_if_dir() {
+  [[ -d "$1" ]] && path=("$1" $path)
+}
+
+path_append_if_dir() {
+  [[ -d "$1" ]] && path+=($1)
+}
+
+source_if_file() {
+  [[ -f "$1" ]] && source "$1"
+}
+
 # GCloud
-source "/opt/homebrew/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/path.zsh.inc"
-source "/opt/homebrew/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/completion.zsh.inc"
+# Homebrew Cask paths are macOS-specific. Guard them so iSH/Alpine can start zsh
+# before google-cloud-sdk is installed.
+if is_macos; then
+  source_if_file "/opt/homebrew/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/path.zsh.inc"
+  source_if_file "/opt/homebrew/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/completion.zsh.inc"
+fi
 
 # Alias
-source ${HOME}/.zsh/modules/aliases.zsh
+source_if_file "${HOME}/.zsh/modules/aliases.zsh"
 
 # Functions
-source ${HOME}/.zsh/modules/functions.zsh
+source_if_file "${HOME}/.zsh/modules/functions.zsh"
 
 
 #### Initialize PATHS
 # Volta
 export VOLTA_HOME="$HOME/.volta"
-export PATH="$VOLTA_HOME/bin:$PATH"
+path_prepend_if_dir "$VOLTA_HOME/bin"
 
 ## Go
-export GOPATH=$(go env GOPATH)
-export PATH=$PATH:$GOPATH/bin
+if command -v go >/dev/null 2>&1; then
+  export GOPATH="$(go env GOPATH)"
+  path_append_if_dir "$GOPATH/bin"
+fi
 
 ## pyenv
 export PYENV_ROOT="$HOME/.pyenv"
-export PATH="$PYENV_ROOT/bin:$PATH"
-eval "$(pyenv init -)"
+path_prepend_if_dir "$PYENV_ROOT/bin"
+if command -v pyenv >/dev/null 2>&1; then
+  eval "$(pyenv init -)"
+fi
 
-# SSL
-export PATH="/opt/homebrew/opt/openssl@3/bin:$PATH"
+# SSL / Homebrew OpenSSL
+if is_macos; then
+  path_prepend_if_dir "/opt/homebrew/opt/openssl@3/bin"
+fi
 
 # aqua
-export PATH="$HOME/.local/share/aquaproj-aqua/bin:$PATH"
+path_prepend_if_dir "$HOME/.local/share/aquaproj-aqua/bin"
 
 # Mise
-eval "$(mise activate zsh)"
+if command -v mise >/dev/null 2>&1; then
+  eval "$(mise activate zsh)"
+fi
 
 # zoxide
-export _ZO_FZF_OPTS="
+if command -v zoxide >/dev/null 2>&1; then
+  export _ZO_FZF_OPTS="
   --height=45%
   --border=rounded
   --layout=reverse
   --preview-window=right:50%
-  --preview='ls -la --color=always \$(echo {} | awk \"{print \\\$NF}\") 2>/dev/null || echo \"Directory not found\"'
+  --preview='ls -la \$(echo {} | awk \"{print \\\$NF}\") 2>/dev/null || echo \"Directory not found\"'
   --color=fg:#b3b5b5,bg:#1a2427,hl:#4fd0ca,fg+:#d1e7ca,bg+:#253133,hl+:#6bb6b0,info:#b3b5b5,prompt:#4fd0ca,pointer:#7dd3fc,marker:#86efac,spinner:#4fd0ca,border:#3f4f50
 "
 
-eval "$(zoxide init zsh)"
+  eval "$(zoxide init zsh)"
+fi
 
+# Starship
 export STARSHIP_CONFIG="$HOME/.config/starship/starship.toml"
-eval "$(starship init zsh)"
+if command -v starship >/dev/null 2>&1; then
+  eval "$(starship init zsh)"
+fi
 
-# MySQL
-export PATH="/opt/homebrew/opt/mysql@9.3/bin:$PATH"
+# MySQL / Homebrew
+if is_macos; then
+  path_prepend_if_dir "/opt/homebrew/opt/mysql@9.3/bin"
+fi
 
 # for Gemini
 export GOOGLE_CLOLUD_LOCATION="asia-northeast1"
 export GOOGLE_GENAI_USER_VERTEXAI=true
 
 # About for Git Editor
-export EDITOR=nvim
+if command -v nvim >/dev/null 2>&1; then
+  export EDITOR=nvim
+elif command -v vim >/dev/null 2>&1; then
+  export EDITOR=vim
+else
+  export EDITOR=vi
+fi
 
 # LazyGit
 export LAZYGIT_CONFIG_DIR="$HOME/.config/lazygit"
 
-# SSL
-export SSL_CERT_FILE=$(python3 -m certifi)
-
+# SSL certifi
+if command -v python3 >/dev/null 2>&1 && python3 -m certifi >/dev/null 2>&1; then
+  export SSL_CERT_FILE="$(python3 -m certifi)"
+fi
