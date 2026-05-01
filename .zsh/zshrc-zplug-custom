@@ -1,9 +1,17 @@
 # zplugの設定
+#
+# iSH/Alpine では zplug plugins の一部が bash, /proc/self/fd, Rust CLI 周りで
+# 起動時エラーを出すため、iSH branch では zplug を読み込まない。
+# 必要なものは apk / 手動インストール後に個別初期化する方針にする。
+if [[ -f /etc/alpine-release || -f /proc/ish || -n "${ISH:-}" ]]; then
+  return 0
+fi
 
 if [[ ! -d ~/.zplug ]];then
   git clone https://github.com/zplug/zplug ~/.zplug
 fi
 
+[[ -f ~/.zplug/init.zsh ]] || return 0
 source ~/.zplug/init.zsh
 
 zplug "zsh-users/zsh-completions"
@@ -41,5 +49,7 @@ fi
 # コマンドをリンクして、PATH に追加し、プラグインは読み込む
 zplug load
 
-zstyle ':completion:*' list-colors ${(s.:.)LS_COLORS}
+if [[ -n "${LS_COLORS:-}" ]]; then
+  zstyle ':completion:*' list-colors ${(s.:.)LS_COLORS}
+fi
 
