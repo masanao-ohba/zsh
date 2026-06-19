@@ -29,3 +29,11 @@ bindkey -e
 bindkey '^A' beginning-of-line
 bindkey '^E' end-of-line
 
+export PATH="$HOME/.local/bin:$PATH"
+
+# bun completions
+[ -s "/Users/masanao.oba/.bun/_bun" ] && source "/Users/masanao.oba/.bun/_bun"
+
+# bun
+export BUN_INSTALL="$HOME/.bun"
+export PATH="$BUN_INSTALL/bin:$PATH"
