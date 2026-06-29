@@ -1,6 +1,0 @@
-alias sine='shutdown now'
-alias Syu='sudo pacman -Syu && yay -Syu'
-alias ls='ls --color=auto'
-alias dc="docker-compose"
-alias dce="dc exec"
-alias dcr="dc run"
