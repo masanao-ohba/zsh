@@ -11,7 +11,6 @@ autoload -Uz zshrc-zplug-custom && zshrc-zplug-custom
 # 上位ディレクトリのfzf表示を無効化
 export ENHANCD_FILTER=
 autoload -Uz zshrc-alias-custom && zshrc-alias-custom
-autoload -Uz zshrc-python && zshrc-python
 autoload -Uz zshrc-initialize && zshrc-initialize
 
 # fzfのキーバインドと補完を読み込む

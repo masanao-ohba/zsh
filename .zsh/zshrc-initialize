@@ -26,11 +26,6 @@ export PATH="$VOLTA_HOME/bin:$PATH"
 export GOPATH=$(go env GOPATH)
 export PATH=$PATH:$GOPATH/bin
 
-## pyenv
-export PYENV_ROOT="$HOME/.pyenv"
-export PATH="$PYENV_ROOT/bin:$PATH"
-eval "$(pyenv init -)"
-
 # SSL
 export PATH="/opt/homebrew/opt/openssl@3/bin:$PATH"
 
@@ -70,4 +65,7 @@ export LAZYGIT_CONFIG_DIR="$HOME/.config/lazygit"
 
 # SSL
 export SSL_CERT_FILE=$(python3 -m certifi)
+
+export PATH="/opt/homebrew/opt/openjdk/bin:$PATH"
+export CPPFLAGS="-I/opt/homebrew/opt/openjdk/include"
 

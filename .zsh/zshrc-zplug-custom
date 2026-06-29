@@ -10,7 +10,6 @@ zplug "zsh-users/zsh-completions"
 zplug "plugins/git", from:oh-my-zsh
 zplug "peterhurford/git-aliases.zsh"
 zplug "plugins/pip", from:oh-my-zsh
-zplug "mattberther/zsh-pyenv"
 
 ########################## fzf
 # fzf でよく使う関数の詰め合わせ
