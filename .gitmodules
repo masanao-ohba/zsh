@@ -1,3 +1,0 @@
-[submodule ".zsh/zshrc-git"]
-	path = .zsh/zshrc-git
-	url = git@github.com:sanoto/zshrc.git

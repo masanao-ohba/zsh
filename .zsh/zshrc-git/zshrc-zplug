@@ -10,20 +10,21 @@ zplug "zsh-users/zsh-completions"
 zplug "plugins/git", from:oh-my-zsh
 zplug "peterhurford/git-aliases.zsh"
 zplug "plugins/pip", from:oh-my-zsh
+zplug "docker/cli", use:"contrib/completion/zsh/_docker"
 
-########################## fzf
-# fzf でよく使う関数の詰め合わせ
 zplug "mollifier/anyframe"
 zplug "mollifier/cd-gitroot"
-# ディレクトリ移動を高速化（fzf であいまい検索）
+zplug "junegunn/fzf-bin", as:command, from:gh-r, rename-to:fzf
+zplug "junegunn/fzf", as:command, use:bin/fzf-tmux
+zplug "junegunn/fzf", use:"shell/*.zsh", as:plugin
 zplug "b4b4r07/enhancd", use:init.sh
-
-# git のローカルリポジトリを一括管理（fzf でリポジトリへジャンプ）
-# zplug "motemen/ghq", as:command, from:gh-r
 
 zplug "b4b4r07/zsh-gomi", as:command, use:bin
 
+zplug "seebi/dircolors-solarized", ignore:"*", as:plugin
+
 zplug "zsh-users/zsh-autosuggestions"
+zplug "zsh-users/zsh-syntax-highlighting", defer:2
 zplug "zsh-users/zsh-history-substring-search", defer:3
 
 zplug "zplug/zplug", hook-build:'zplug --self-manage'
@@ -38,7 +39,9 @@ if ! zplug check --verbose; then
 fi
 
 # コマンドをリンクして、PATH に追加し、プラグインは読み込む
-zplug load
+zplug load --verbose
 
+export LSCOLORS=exfxcxdxbxegedabagacad
+export LS_COLORS='di=34:ln=35:so=32:pi=33:ex=31:bd=46;34:cd=43;34:su=41;30:sg=46;30:tw=42;30:ow=43;30'
+eval $(dircolors $ZPLUG_HOME/repos/seebi/dircolors-solarized/dircolors.ansi-dark)
 zstyle ':completion:*' list-colors ${(s.:.)LS_COLORS}
-

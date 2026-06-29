@@ -24,7 +24,6 @@
     zplug "peterhurford/git-aliases.zsh"
     zplug "plugins/pip", from:oh-my-zsh
    -zplug "docker/cli", use:"contrib/completion/zsh/_docker"
-    zplug "mattberther/zsh-pyenv"
 
     zplug "mollifier/anyframe"
     zplug "mollifier/cd-gitroot"

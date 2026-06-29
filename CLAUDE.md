@@ -37,8 +37,7 @@ source ~/.zshrc
 2. Custom configurations override base settings:
    - `zshrc-zplug-custom` - Plugin management
    - `zshrc-alias-custom` - Custom aliases
-   - `zshrc-python` - Python environment setup
-   - `zshrc-initialize` - PATH and tool initialization
+   - `zshrc-initialize` - PATH and tool initialization (includes `mise activate`)
 3. Local modules are sourced directly:
    - `modules/aliases.zsh` - Development shortcuts
    - `modules/functions.zsh` - Utility functions
@@ -57,7 +56,7 @@ Plugin installation is automatic on first run or when new plugins are added.
 
 The configuration includes specialized setups for:
 - **Git**: Custom aliases and branch switching with fzf
-- **Python**: pyenv integration and SSL certificate configuration
+- **Python**: mise (version management) + uv (packaging/venv) integration and SSL certificate configuration
 - **Node.js**: Volta package manager
 - **Kubernetes**: kubectl aliases and configurations
 - **Google Cloud**: SDK integration and project configurations
