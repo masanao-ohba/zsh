@@ -7,8 +7,8 @@ bindkey -r '^T'
 setopt auto_pushd
 
 # GCloud
-source "/opt/homebrew/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/path.zsh.inc"
-source "/opt/homebrew/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/completion.zsh.inc"
+source "/opt/homebrew/share/google-cloud-sdk/path.zsh.inc"
+source "/opt/homebrew/share/google-cloud-sdk/completion.zsh.inc"
 
 # Alias
 source ${HOME}/.zsh/modules/aliases.zsh
@@ -30,6 +30,7 @@ export PATH=$PATH:$GOPATH/bin
 export PATH="/opt/homebrew/opt/openssl@3/bin:$PATH"
 
 # aqua
+export AQUA_GLOBAL_CONFIG="$HOME/.config/aquaproj-aqua/aqua.yaml"
 export PATH="$HOME/.local/share/aquaproj-aqua/bin:$PATH"
 
 # Mise
@@ -64,7 +65,13 @@ export EDITOR=nvim
 export LAZYGIT_CONFIG_DIR="$HOME/.config/lazygit"
 
 # SSL
-export SSL_CERT_FILE=$(python3 -m certifi)
+# certifi のバンドルが存在する場合のみ設定する。
+# Python バージョンの切替/削除で参照先が消えると curl(77) になるため、
+# 取得失敗・ファイル不在時は未設定のままシステム既定の CA にフォールバックさせる。
+if _ssl_cert_file=$(python3 -m certifi 2>/dev/null) && [ -f "$_ssl_cert_file" ]; then
+  export SSL_CERT_FILE="$_ssl_cert_file"
+fi
+unset _ssl_cert_file
 
 export PATH="/opt/homebrew/opt/openjdk/bin:$PATH"
 export CPPFLAGS="-I/opt/homebrew/opt/openjdk/include"

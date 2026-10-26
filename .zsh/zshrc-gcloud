@@ -1,0 +1,84 @@
+# gcloud コンテキスト横断切替(CLOUDSDK_CONFIG 分離方式)
+#
+# 各コンテキストは ~/.config/gcloud-envs/<name>/ に account+project+ADC を完全分離して保持。
+# 切替は CLOUDSDK_CONFIG を差し替えるだけなので、quota project 警告は原理的に出ない。
+#
+#   gce            … fzf でコンテキストを選んで切替(ショートカット: Ctrl+O)
+#   gce <name>     … 名前を直接指定して切替
+#   gce-          … 直前のコンテキストへ戻る
+#   gcw            … 現在のコンテキストを表示
+#   gce-new <name> <project> [account] … 新規コンテキストを作成(初回のみ・認証あり)
+
+export GCLOUD_ENVS_DIR="${GCLOUD_ENVS_DIR:-$HOME/.config/gcloud-envs}"
+
+# 現在のコンテキスト表示
+gcw() {
+  if [[ -n "$CLOUDSDK_CONFIG" && "$CLOUDSDK_CONFIG" == "$GCLOUD_ENVS_DIR"/* ]]; then
+    print -r -- "[$(basename "$CLOUDSDK_CONFIG")] $(gcloud config get-value account 2>/dev/null) / $(gcloud config get-value project 2>/dev/null)"
+  else
+    print -r -- "[global] $(gcloud config get-value account 2>/dev/null) / $(gcloud config get-value project 2>/dev/null)"
+  fi
+}
+
+# コンテキスト切替(引数なしなら fzf、引数ありなら直接)
+gce() {
+  local name="$1"
+  if [[ -z "$name" ]]; then
+    name=$(find "$GCLOUD_ENVS_DIR" -mindepth 1 -maxdepth 1 -type d 2>/dev/null \
+            | sort \
+            | fzf --prompt='gcloud ctx> ' --height=40% --reverse --ansi \
+                  --with-nth=-1 --delimiter=/ \
+                  --preview 'CLOUDSDK_CONFIG={} gcloud config list 2>/dev/null') || return
+    [[ -n "$name" ]] || return
+    name=$(basename "$name")
+  fi
+  local dir="$GCLOUD_ENVS_DIR/$name"
+  if [[ ! -d "$dir" ]]; then
+    print -r -- "gce: コンテキストが存在しません: $name" >&2
+    return 1
+  fi
+  export GCLOUD_CTX_PREV="$CLOUDSDK_CONFIG"
+  export CLOUDSDK_CONFIG="$dir"
+  gcw
+}
+
+# 直前のコンテキストへ戻る(未設定ならグローバルへ)
+gce-() {
+  local cur="$CLOUDSDK_CONFIG"
+  if [[ -n "$GCLOUD_CTX_PREV" ]]; then
+    export CLOUDSDK_CONFIG="$GCLOUD_CTX_PREV"
+  else
+    unset CLOUDSDK_CONFIG
+  fi
+  export GCLOUD_CTX_PREV="$cur"
+  gcw
+}
+
+# 新規コンテキスト作成(初回のみ。ブラウザ認証が走る)
+gce-new() {
+  local name="$1" project="$2" account="$3"
+  if [[ -z "$name" || -z "$project" ]]; then
+    print -r -- "usage: gce-new <name> <project> [account]" >&2
+    return 1
+  fi
+  local dir="$GCLOUD_ENVS_DIR/$name"
+  mkdir -p "$dir"
+  export CLOUDSDK_CONFIG="$dir"
+  gcloud config set disable_usage_reporting true >/dev/null 2>&1
+  if [[ -n "$account" ]] && gcloud auth list --format='value(account)' 2>/dev/null | grep -qx "$account"; then
+    gcloud config set account "$account"      # 認証済みなら再ログイン不要
+  else
+    gcloud auth login ${account:+"$account"}  # CLI ユーザー認証
+  fi
+  gcloud config set project "$project"
+  print -r -- "ADC(クライアントライブラリ)が必要なら: gcloud auth application-default login && gcloud auth application-default set-quota-project $project"
+  gcw
+}
+
+# fzf 切替を ZLE ウィジェット化してキーバインド(Ctrl+O)。対話シェルのみ。
+# macOS の Option キーは Meta(ESC)にならず特殊文字を出すため、Option 非依存の Ctrl 系を使う。
+if [[ -o interactive ]]; then
+  _gce-zle() { gce </dev/tty; zle reset-prompt }
+  zle -N _gce-zle
+  bindkey '^O' _gce-zle
+fi

@@ -36,3 +36,8 @@ export PATH="$HOME/.local/bin:$PATH"
 # bun
 export BUN_INSTALL="$HOME/.bun"
 export PATH="$BUN_INSTALL/bin:$PATH"
+
+# gcloud コンテキスト横断切替(gce / Ctrl+O)。bindkey が他に上書きされないよう最後尾で読み込む
+autoload -Uz zshrc-gcloud && zshrc-gcloud
+export CURL_CA_BUNDLE="$HOME/.cacert.pem"
+export CURL_CA_BUNDLE="$HOME/.cacert.pem"
